@@ -1,5 +1,5 @@
 # 2026-11-15
-## This foler Includ
+## This folder Include
 - button_arduino.cpp
 - button_arduino.png
 
