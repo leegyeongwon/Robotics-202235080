@@ -14,6 +14,8 @@
 #define RL_IN1 0
 #define RL_IN2 15
 
+
+// front, back repeat
 int motorPins[8] = {
     FR_IN1, FR_IN2,
     FL_IN1, FL_IN2,
@@ -33,18 +35,23 @@ void setup() {
 
 void loop() {
     for (int i = 0; i < 8; i += 2) {
+
+      // go front
         digitalWrite(motorPins[i], HIGH);
         digitalWrite(motorPins[i + 1], LOW);
         delay(1000);
 
+      // stop
         digitalWrite(motorPins[i], LOW);
         digitalWrite(motorPins[i + 1], LOW);
         delay(200);
 
+
+      // go back
         digitalWrite(motorPins[i], LOW);
         digitalWrite(motorPins[i + 1], HIGH);
         delay(1000);
-
+      // go stop
         digitalWrite(motorPins[i], LOW);
         digitalWrite(motorPins[i + 1], LOW);
         delay(200);
