@@ -26,6 +26,9 @@ setup(
         'console_scripts': [
             'talker = 1_pubsub.talker:main',   # 수정
             'listener = 1_pubsub.listener:main',   # 수정
+            'publisher = 1_pubsub.listener:main',   # 수정
+            'processor = 1_pubsub.listener:main',   # 수정
+            'subscriber = 1_pubsub.listener:main',   # 수정
         ],
     },
 )
