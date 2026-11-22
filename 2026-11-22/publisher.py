@@ -6,7 +6,7 @@ class Publisher(Node):
     def __init__(self):
         super().__init__('publisher')
         self.publisher_ = self.create_publisher(String, '/publisher_topic', 10)
-        self.timer = self.create_timer(1.0, self.publish_message)
+        self.timer = self.create_timer(0.3, self.publish_message)
 
     def publish_message(self):
         msg = String()

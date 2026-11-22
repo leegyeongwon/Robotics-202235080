@@ -10,18 +10,18 @@ class Processor(Node):
 
         self.current_state = [0,0]
         self.publisher_ = self.create_publisher(String, '/processor_topic', 10)
-        self.timer = self.create_timer(1.0, self.processor_publish)
+        self.timer = self.create_timer(0.3, self.processor_publish)
 
     def callback(self, msg):
         self.get_logger().info(f'Received: "{msg.data}"')
 
-        if msg.data == "w":
+        if msg.data == "w" or msg.data == "W":
             self.current_state[1] += 1
-        elif msg.data == "s":
+        elif msg.data == "s" or msg.data == "S":
             self.current_state[1] -= 1
-        elif msg.data == "d":
+        elif msg.data == "d" or msg.data == "D":
             self.current_state[0] += 1
-        elif msg.data == "a":
+        elif msg.data == "a" or msg.data == "A":
             self.current_state[0] -= 1
 
 

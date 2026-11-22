@@ -94,6 +94,19 @@ colcon: build tool
 - analyze dependencies
 - build pakages that developer want.
 
+Launch File: Make ros2 run ... -> execute by one click or command.
+my_location.launch.py, setup.py  Its almost python code/file.
+
+Service: Request and Response.
+It is Composed 'Client-Server' structure. For One-time request and short management
+use .srv file
+ex) what is A-module's sensor value
+
+Action: Client-server structure and Goat-Feedback-Result
+ex) Go to that location(Give sensors value or Feedback, etc to server continuously).
+
+Custom Interface: Define Data Structure in person. 
+
 ## 3. SLAM, Simulation 
 
 ## 4. RTOS based high-low level peristalsis
