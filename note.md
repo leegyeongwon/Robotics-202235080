@@ -25,6 +25,9 @@ ex) Serial.begin(115200)
 voltage bouncing
 PWM: Pulse Width Modulator. Use duty cycle
 IMU(Inertial Measurement Unit): gyro, accelameter
+GNSS: Similar with GPS. but cannot use indoor
+Wheel Encoder: Get data about how much that wheel has spun around. Its important but error is occur when wheel is sliped.
+LIDAR: Detect distances based with laser. 360 degrees
 
 2 way for embedded communication protocol. IMU --[inertia]--> MCU
 1. synchronous: There is a clock in MCU. make frequency. If you want to communicate with IMU, both of them will synchronize the frequency. ex) baud rate 115200 bit/s.
@@ -71,7 +74,7 @@ action
 vizualization command: rqt_graph
 
 DDS
-QoS(Quality of Service) - !IMPORTANT!
+QoS(Quality of Service) - !IMPORTANT!  communication protocol (node <---> node)
 - Reliability
   - Best effort
   - Reliable
@@ -106,6 +109,41 @@ Action: Client-server structure and Goat-Feedback-Result
 ex) Go to that location(Give sensors value or Feedback, etc to server continuously).
 
 Custom Interface: Define Data Structure in person. 
+
+
+HIGH level: cognition, planning, control (PPA)
+get data + analysis, target/path planning, pose conrtol
+
+Cognition: Get data from sensors + "position of the robot inself" and environments around
+Planning: Edit planning on time
+Action: Do action
+
+AMR: Autonomous Mobile Robot is what we will do. 
+
+
+Reference commands: 
+```bash
+ros2 launch turtlebot3_gazebo turtlebot3_dqn_stage1.launch.py
+ros2 topic pub /cmd_vel geometry_msgs/msg/TwistStamped "{twist: {angular: {z: 1.0}}}"
+ros2 run turtlebot3_teleop teleop_keyboard
+rviz2
+```
+
+
+/odom: topic contain how much I have gone far or spun
+
+Quatanion -> w^2 + x^2 + y^2 + z^2 = 1
+
+TF(transform) important
+Parent Frame(rlwns whkvyrP) <---> Child Frame(qnah rlwns dnlcl/ghlwjs)
+
+Static TF: fixed TF. low network usage
+Dynamic TF: tlftlrks dnlcl cnwjr. tlrksdp Ekfk qusgksms dnlcl rhksrP. wlthrwjrdls epdlxj tmxmflald. rhwnvktnfh wlthrwjrdls epdlxjfmf qkfgodgkrh djqepdlxm
+
+Broadcaster: whkvyrP wjdqh qkfgod. rkr fldzm rksdml tkdeowjr dnlclfmf tlftlrksdmfh qkdthd
+ehdwjr/wjdwjr qusghks rhksfl: wjdwjr qusghks, ehdwjr qusghksdmf sksndj wjsthd
+
+Listner: whkvyrP wjdqh tnwlq, whkvy qusghks rPtks
 
 ## 3. SLAM, Simulation 
 

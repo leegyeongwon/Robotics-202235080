@@ -44,16 +44,8 @@ enum DriveState {
 };
 DriveState currentState = STATE_GO_FRONT;
 
-// LIDAR: 0~359도에 저장된 거리값을 모두 출력한다
-void printAllDistances() {
-    /*
-    for (int degree = 150; degree < 210; degree++) {
-        Serial.print(degree);
-        Serial.print(" deg : ");
-        Serial.print(distances[degree]);
-        Serial.println(" mm");
-    }
-    */
+// LIDAR: 0, 90, 180, 270 degree 거리값을 모두 출력한다
+void printFourDistances() {
     int degree = 0;
     Serial.print(distances[0]);
     Serial.println(" mm");
@@ -314,7 +306,7 @@ void loop() {
             break;
 
         case STATE_GO_LEFT:
-        
+
             //Temp LOGIC
             goFront();
             if (isObstacleDetected(135, 225)) {
