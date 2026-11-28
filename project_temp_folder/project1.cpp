@@ -13,8 +13,8 @@
 
 // LIDAR RX
 #define LIDAR_RX 16
-// Obstacle is near -> return true or false
-#define OBSTACLE_LIMIT_MM 50
+// Obstacle is near -> return true or false  (10cm)
+#define OBSTACLE_LIMIT_MM 100
 
 uint8_t packet[47];
 uint16_t distances[360] = {0};
@@ -46,13 +46,23 @@ DriveState currentState = STATE_GO_FRONT;
 
 // LIDAR: 0~359도에 저장된 거리값을 모두 출력한다
 void printAllDistances() {
-    for (int degree = 0; degree < 360; degree++) {
+    /*
+    for (int degree = 150; degree < 210; degree++) {
         Serial.print(degree);
         Serial.print(" deg : ");
         Serial.print(distances[degree]);
         Serial.println(" mm");
     }
-
+    */
+    int degree = 0;
+    Serial.print(distances[0]);
+    Serial.println(" mm");
+    Serial.print(distances[90]);
+    Serial.println(" mm");
+    Serial.print(distances[180]);
+    Serial.println(" mm");
+    Serial.print(distances[270]);
+    Serial.println(" mm");
     Serial.println("----------------");
 }
 
@@ -75,21 +85,41 @@ void goBack() {
     digitalWrite(motorPins[1], HIGH);
 
     digitalWrite(motorPins[2], LOW);
-    digitalWrite(motorPins[3], HGIH);
+    digitalWrite(motorPins[3], HIGH);
 
     digitalWrite(motorPins[4], LOW);
-    digitalWrite(motorPins[5], HGIH);
+    digitalWrite(motorPins[5], HIGH);
 
     digitalWrite(motorPins[6], LOW);
-    digitalWrite(motorPins[7], HGIH);
+    digitalWrite(motorPins[7], HIGH);
 }
 
 void goRight() {
-    // TODO
+    digitalWrite(motorPins[0], LOW);
+    digitalWrite(motorPins[1], LOW);
+
+    digitalWrite(motorPins[2], HIGH);
+    digitalWrite(motorPins[3], LOW);
+
+    digitalWrite(motorPins[4], LOW);
+    digitalWrite(motorPins[5], LOW);
+
+    digitalWrite(motorPins[6], HIGH);
+    digitalWrite(motorPins[7], LOW);
 }
 
 void goLeft() {
-    // TODO
+    digitalWrite(motorPins[0], HIGH);
+    digitalWrite(motorPins[1], LOW);
+
+    digitalWrite(motorPins[2], LOW);
+    digitalWrite(motorPins[3], LOW);
+
+    digitalWrite(motorPins[4], HIGH);
+    digitalWrite(motorPins[5], LOW);
+
+    digitalWrite(motorPins[6], LOW);
+    digitalWrite(motorPins[7], LOW);
 }
 
 void stopMotor() {
@@ -178,7 +208,6 @@ void checkLidar() {
     }
 }
 
-
 /*
  * Back  :    0°
  * Left  :   90°
@@ -186,9 +215,8 @@ void checkLidar() {
  * Right :  270°
 */
 
-// 전방 60도를 검토
 bool isObstacleDetected(int angleFrom, int angleTo) {
-    for (int deg = angleFrom; deg <= angleTo; deg++) {
+    for (int deg = angleFrom; deg < angleTo; deg++) {
         if (distances[deg] > 0 && distances[deg] < OBSTACLE_LIMIT_MM) {
             return true;
         }
@@ -199,10 +227,8 @@ bool isObstacleDetected(int angleFrom, int angleTo) {
 
 
 
-
-
 void setup() {
-    Serial.begin(115200);  // 시리얼 모니터
+    Serial.begin(115200);
     Serial2.begin(230400, SERIAL_8N1, LIDAR_RX, -1);  // LiDAR -> RX 시리얼 통신 (TX 사용안함)
 
     for (int i = 0; i < 8; i++) {
@@ -224,32 +250,86 @@ void loop() {
     switch (currentState) {
         case STATE_GO_FRONT:
             goFront();
-            if (isObstacleDetected(150, 210)) {
+            if (isObstacleDetected(135, 225)) {
                 Serial.println("장애물 감지: 정지");
                 stopMotor();
+                for (int i = 0; i < 360; i++) {
+                  distances[i] = 10000;
+                }
                 currentState = STATE_STOP;
             }
             break;
 
         case STATE_STOP:
             stopMotor();
-            // 0.5초(500ms) 동안 완전히 멈춘 뒤 후진으로 전환
-            delay(500);
-            Serial.println("후진");
-            currentState = STATE_BACK;
-            stateStartTime = millis();
+            // 0.5초 동안 완전히 멈춘 뒤 후진
+            delay(50);
+
+            if(!isObstacleDetected(225, 359)) {
+                Serial.println("Right has no obstacle. Go right");
+                currentState = STATE_GO_RIGHT;
+                break;
+            }
+            else if(!isObstacleDetected(45, 135)) {
+                Serial.println("Left has no obstacle. Go left");
+                currentState = STATE_GO_LEFT;
+                break;
+            }
+            else {
+                Serial.println("There are obstacles all around. Go back");
+                currentState = STATE_GO_BACK;
+                break;
+            }
             break;
 
         case STATE_GO_BACK:
             goBack();
-            // 1초(1000ms) 동안 후진한 뒤 다시 전진 상태로 복귀
+            // 1초(1000ms) 동안 후진한 뒤 다시 전진
             delay(1000);
             Serial.println("전진");
-            // 거리 초기화
-            for (int deg = 1; deg <= 360; deg++) {
-                distances[deg] = 9999;
+            for (int i = 0; i < 360; i++) {
+                distances[i] = 10000;
             }
-            currentState = STATE_FRONT;
+            currentState = STATE_GO_FRONT;
+            break;
+            
+        case STATE_GO_RIGHT:
+
+            //Temp LOGIC
+            goFront();
+            if (isObstacleDetected(135, 225)) {
+                Serial.println("장애물 감지: 정지");
+                stopMotor();
+                for (int i = 0; i < 360; i++) {
+                  distances[i] = 10000;
+                }
+                currentState = STATE_STOP;
+            }
+            
+            break;
+
+            // TODO: LOGIC
+            
+            currentState = STATE_GO_FRONT;
+            break;
+
+        case STATE_GO_LEFT:
+        
+            //Temp LOGIC
+            goFront();
+            if (isObstacleDetected(135, 225)) {
+                Serial.println("장애물 감지: 정지");
+                stopMotor();
+                for (int i = 0; i < 360; i++) {
+                  distances[i] = 10000;
+                }
+                currentState = STATE_STOP;
+            }
+            break;
+
+            // TODO: LOGIC
+
+            currentState = STATE_GO_FRONT;
             break;
     }
 }
