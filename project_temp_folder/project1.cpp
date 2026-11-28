@@ -11,10 +11,10 @@
 #define RL_IN2 15
 
 
-// LIDAR RX
-#define LIDAR_RX 16
-// Obstacle is near -> return true or false  (10cm)
-#define OBSTACLE_LIMIT_MM 100
+
+#define LIDAR_RX 16            // LIDAR RX
+#define OBSTACLE_LIMIT_MM 100  // 장애물 감지 거리 10cm
+#define TURN_DURATION_MS 3000  // 회전 유지 시간
 
 uint8_t packet[47];
 uint16_t distances[360] = {0};
@@ -44,7 +44,7 @@ enum DriveState {
 };
 DriveState currentState = STATE_GO_FRONT;
 
-// LIDAR: 0, 90, 180, 270 degree 거리값을 모두 출력한다
+// LIDAR: 0, 90, 180, 270도 거리값을 출력한다
 void printFourDistances() {
     int degree = 0;
     Serial.print(distances[0]);
@@ -217,7 +217,11 @@ bool isObstacleDetected(int angleFrom, int angleTo) {
 }
 
 
-
+void resetDistances() {
+    for (int i = 0; i < 360; i++) {
+        distances[i] = 10000;
+    }
+}
 
 void setup() {
     Serial.begin(115200);
@@ -229,98 +233,62 @@ void setup() {
     }
 
     // 거리 배열을 큰 값으로 초기화 (초기 오작동 방지)
-    for (int i = 0; i < 360; i++) {
-        distances[i] = 10000;
-    }
+    resetDistances();
 }
 
 void loop() {
-    // 매 루프마다 라이다 데이터 최신화
-    checkLidar();
+    checkLidar();  // 매 루프마다 라이다 데이터 최신화
 
-    // 상태에 따른 주행 
+    // 상태에 따른 주행. 초기값은 STATE_GO_FRONT
     switch (currentState) {
         case STATE_GO_FRONT:
             goFront();
             if (isObstacleDetected(135, 225)) {
                 Serial.println("장애물 감지: 정지");
                 stopMotor();
-                for (int i = 0; i < 360; i++) {
-                  distances[i] = 10000;
-                }
+                resetDistances();
                 currentState = STATE_STOP;
             }
             break;
 
         case STATE_STOP:
             stopMotor();
-            // 0.5초 동안 완전히 멈춘 뒤 후진
             delay(50);
 
-            if(!isObstacleDetected(225, 359)) {
-                Serial.println("Right has no obstacle. Go right");
+            if (!isObstacleDetected(225, 359)) {
+                Serial.println("오른쪽 장애물 없음 우회전");
                 currentState = STATE_GO_RIGHT;
-                break;
-            }
-            else if(!isObstacleDetected(45, 135)) {
-                Serial.println("Left has no obstacle. Go left");
+            } else if (!isObstacleDetected(45, 135)) {
+                Serial.println("왼쪽 장애물 없음 좌회전");
                 currentState = STATE_GO_LEFT;
-                break;
-            }
-            else {
-                Serial.println("There are obstacles all around. Go back");
+            } else {
+                Serial.println("좌우 장애물 있음 후진");
                 currentState = STATE_GO_BACK;
-                break;
             }
             break;
 
         case STATE_GO_BACK:
             goBack();
-            // 1초(1000ms) 동안 후진한 뒤 다시 전진
-            delay(1000);
-            Serial.println("전진");
-            for (int i = 0; i < 360; i++) {
-                distances[i] = 10000;
-            }
+            delay(1000);   // 1000ms 동안 후진한 뒤 다시 전진
+            stopMotor();
+            Serial.println("다시 전진");
+            resetDistances();
             currentState = STATE_GO_FRONT;
             break;
-            
+
         case STATE_GO_RIGHT:
-
-            //Temp LOGIC
-            goFront();
-            if (isObstacleDetected(135, 225)) {
-                Serial.println("장애물 감지: 정지");
-                stopMotor();
-                for (int i = 0; i < 360; i++) {
-                  distances[i] = 10000;
-                }
-                currentState = STATE_STOP;
-            }
-            
-            break;
-
-            // TODO: LOGIC
-            
+            Serial.println("우회전 중");
+            goRight();
+            delay(TURN_DURATION_MS);
+            resetDistances();
             currentState = STATE_GO_FRONT;
             break;
 
         case STATE_GO_LEFT:
-
-            //Temp LOGIC
-            goFront();
-            if (isObstacleDetected(135, 225)) {
-                Serial.println("장애물 감지: 정지");
-                stopMotor();
-                for (int i = 0; i < 360; i++) {
-                  distances[i] = 10000;
-                }
-                currentState = STATE_STOP;
-            }
-            break;
-
-            // TODO: LOGIC
-
+            Serial.println("좌회전 중");
+            goLeft();
+            delay(TURN_DURATION_MS);
+            resetDistances();
             currentState = STATE_GO_FRONT;
             break;
     }
